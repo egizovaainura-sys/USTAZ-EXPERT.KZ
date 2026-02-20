@@ -2,6 +2,13 @@ import streamlit as st
 import gspread
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
+import io
+
+# --- ДОБАВЬТЕ ЭТИ ТРИ СТРОКИ ОБЯЗАТЕЛЬНО! ---
+from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 # --- ФУНКЦИЯ ПОДКЛЮЧЕНИЯ ---
 def connect_google():
@@ -376,3 +383,4 @@ elif menu == "Аналитика":
         except Exception as e:
 
             st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
+
