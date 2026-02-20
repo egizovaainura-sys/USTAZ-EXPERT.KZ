@@ -466,3 +466,4 @@ elif menu == "Аналитика":
                 st.info("База данных пока пуста.")
         except Exception as e:
             st.warning(f"Ошибка загрузки данных: {e}")
+
