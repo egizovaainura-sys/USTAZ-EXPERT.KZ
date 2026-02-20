@@ -424,9 +424,9 @@ if menu == "Ввод данных":
 
         # Подготовка файла к отправке пользователю
     import io
-        bio = io.BytesIO()
-        docx_file.save(bio)
-        docx_bytes = bio.getvalue()
+      bio = io.BytesIO()
+      docx_file.save(bio)
+      docx_bytes = bio.getvalue()
 
         # Визуальный разделитель в приложении
         st.divider()
@@ -483,6 +483,7 @@ elif menu == "Аналитика":
                 
         except Exception as e:
             st.warning(f"Ошибка загрузки аналитики: {e}")
+
 
 
 
