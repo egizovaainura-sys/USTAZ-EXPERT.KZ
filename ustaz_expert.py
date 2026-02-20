@@ -412,23 +412,21 @@ if menu == "Приложение 14 (Аттестация)":
         'recs': recs
     }, lang)
     
-  # --- ПОДГОТОВКА ФАЙЛА WORD (сдвинуто на 8 пробелов) ---
-    import io
-    bio = io.BytesIO()
-    docx_file.save(bio)
-    docx_bytes = bio.getvalue()
+  # --- 1. Сначала превращаем документ Word в байты (готовим к отправке) ---
+        import io
+        bio = io.BytesIO()
+        docx_file.save(bio)
+        docx_bytes = bio.getvalue()
 
-        st.divider() # Разделительная линия для красоты
-
-        # КНОПКА 1: Сохранение (всегда на виду)
-        if st.button("💾 Сохранить данные в Google Таблицу"):
-            try:
-                # Тут ваш код сохранения (ws.append_row)
-                row_to_add = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
-                ws.append_row(row_to_add)
-                st.success("✅ Данные успешно добавлены!")
+        col_down.download_button(
+            label="📄 Скачать Лист наблюдения (Word)",
+            data=docx_bytes,
+            file_name=f"List_Nabludeniya_{t_fio}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+            st.success("✅ Данные успешно добавлены!")
             except Exception as e:
-                st.error(f"Ошибка сохранения: {e}")
+            st.error(f"Ошибка сохранения: {e}")
 
         # КНОПКА 2: Скачивание (ТЕПЕРЬ ОНА НЕ ИСЧЕЗНЕТ!)
         st.download_button(
@@ -442,6 +440,7 @@ if menu == "Приложение 14 (Аттестация)":
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
     # ... (ваш код аналитики)
+
 
 
 
