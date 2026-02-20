@@ -414,39 +414,40 @@ if menu == "Ввод данных":
             'scores': scores, 'total': total_score, 'recs': recs
         }, lang)
 
+        # --- 1. ПЕРЕВОД В БАЙТЫ (Строго под lang) ---
+        import io
         bio = io.BytesIO()
         docx_file.save(bio)
         docx_bytes = bio.getvalue()
 
         st.divider()
 
-        # --- 2. КНОПКИ ДЕЙСТВИЙ (С уникальными ключами) ---
-        c_save, c_down = st.columns(2)
+        # --- 2. КНОПКИ ДЕЙСТВИЙ (В две колонки) ---
+        col_s, col_d = st.columns(2)
 
-        with c_save:
-            # key="final_save_button" решает проблему StreamlitDuplicateElementId
-            if st.button("💾 Сохранить в базу", key="final_save_button"):
+        with col_s:
+            # key="save_final_v1" решает проблему DuplicateElementId
+            if st.button("💾 Сохранить в базу", key="save_final_v1"):
                 try:
                     sh = connect_google()
                     if sh:
                         ws = sh.worksheet("Аналитика_Приложение14")
-                        row = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
-                        ws.append_row(row)
-                        st.success("✅ Данные успешно добавлены!")
+                        ws.append_row([str(t_date), o_fio, t_fio, t_subj, t_topic, total_score])
+                        st.success("✅ Данные сохранены в таблицу!")
                 except Exception as e:
                     st.error(f"Ошибка сохранения: {e}")
 
-        with c_down:
-            # Кнопка скачивания теперь видна всегда
+        with col_d:
+            # Кнопка скачивания Word (видна всегда)
             st.download_button(
                 label="📄 Скачать Лист (Word)",
                 data=docx_bytes,
-                file_name=f"List_Nabludeniya_{t_fio}.docx",
+                file_name=f"List_{t_fio}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                key="final_download_button"
+                key="download_final_v1"
             )
 
-# --- 3. РАЗДЕЛ АНАЛИТИКА (Прижат к левому краю, 0 пробелов!) ---
+# --- 3. АНАЛИТИКА (Прижат к левому краю, без пробелов!) ---
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
     sh = connect_google()
@@ -455,7 +456,6 @@ elif menu == "Аналитика":
             ws = sh.worksheet("Аналитика_Приложение14")
             df = pd.DataFrame(ws.get_all_records())
             if not df.empty:
-                # Фильтруем данные вашей школы
                 school_df = df[df['Школа'] == u['школа']]
                 st.dataframe(school_df)
                 if not school_df.empty:
@@ -463,5 +463,4 @@ elif menu == "Аналитика":
             else:
                 st.info("База данных пока пуста.")
         except Exception as e:
-            st.warning(f"Ошибка загрузки данных: {e}")
-
+            st.warning(f"Ошибка загрузки: {e}")
