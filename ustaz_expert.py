@@ -406,52 +406,44 @@ if menu == "Ввод данных":
     # Здесь должен идти ваш блок с полями ввода (t_fio, t_topic и т.д.)
     # Если он уже есть выше - хорошо, если нет - проверьте переменные.
 
-    # --- 2. ГЕНЕРАЦИЯ WORD (8 пробелов от края) ---
-    docx_file = generate_official_word({
-        'teacher': t_fio, 't_cat': t_cat, 'observer': o_fio, 'o_pos': o_pos,
-        'date': str(t_date), 'subject': t_subj, 'topic': t_topic, 'goal': t_goal,
-        'scores': scores, 'total': total_score, 'recs': recs
-    }, lang)
-
-    import io
-    bio = io.BytesIO()
-    docx_file.save(bio)
-    docx_bytes = bio.getvalue()
-
-    st.divider()
-
-   # --- 1. ПРЕВРАЩАЕМ WORD В БАЙТЫ (Строго под generate_official_word) ---
+   # --- 1. ГЕНЕРАЦИЯ WORD (Внутри блока Ввод данных) ---
         import io
+        docx_file = generate_official_word({
+            'teacher': t_fio, 't_cat': t_cat, 'observer': o_fio, 'o_pos': o_pos,
+            'date': str(t_date), 'subject': t_subj, 'topic': t_topic, 'goal': t_goal,
+            'scores': scores, 'total': total_score, 'recs': recs
+        }, lang)
+
         bio = io.BytesIO()
         docx_file.save(bio)
         docx_bytes = bio.getvalue()
 
         st.divider()
 
-        # --- 2. КНОПКИ ДЕЙСТВИЙ (В две колонки) ---
-        col_save, col_down = st.columns(2)
+        # --- 2. КНОПКИ ДЕЙСТВИЙ (С уникальными ключами) ---
+        c_save, c_down = st.columns(2)
 
-        with col_save:
-            # key="save_vfinal" убирает ошибку StreamlitDuplicateElementId
-            if st.button("💾 Сохранить в базу", key="save_vfinal"):
+        with c_save:
+            # key="final_save_button" решает проблему StreamlitDuplicateElementId
+            if st.button("💾 Сохранить в базу", key="final_save_button"):
                 try:
                     sh = connect_google()
                     if sh:
                         ws = sh.worksheet("Аналитика_Приложение14")
-                        # Сохраняем данные для платформы Устаз
-                        ws.append_row([str(t_date), o_fio, t_fio, t_subj, t_topic, total_score])
-                        st.success("✅ Данные успешно сохранены в таблицу!")
+                        row = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
+                        ws.append_row(row)
+                        st.success("✅ Данные успешно добавлены!")
                 except Exception as e:
-                    st.error(f"Ошибка записи: {e}")
+                    st.error(f"Ошибка сохранения: {e}")
 
-        with col_down:
-            # Кнопка скачивания теперь видна всегда и имеет свой ключ
+        with c_down:
+            # Кнопка скачивания теперь видна всегда
             st.download_button(
-                label="📄 Скачать Лист наблюдения (Word)",
+                label="📄 Скачать Лист (Word)",
                 data=docx_bytes,
                 file_name=f"List_Nabludeniya_{t_fio}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                key="download_vfinal"
+                key="final_download_button"
             )
 
 # --- 3. РАЗДЕЛ АНАЛИТИКА (Прижат к левому краю, 0 пробелов!) ---
@@ -461,29 +453,14 @@ elif menu == "Аналитика":
     if sh:
         try:
             ws = sh.worksheet("Аналитика_Приложение14")
-            data = ws.get_all_records()
-            df = pd.DataFrame(data)
-            
+            df = pd.DataFrame(ws.get_all_records())
             if not df.empty:
                 # Фильтруем данные вашей школы
                 school_df = df[df['Школа'] == u['школа']]
                 st.dataframe(school_df)
-                
                 if not school_df.empty:
                     st.bar_chart(school_df, x="Педагог", y="Итог")
-                else:
-                    st.info("По вашей школе данных пока нет.")
             else:
                 st.info("База данных пока пуста.")
-                
         except Exception as e:
-            st.warning(f"Ошибка загрузки данных: {e}. Проверьте таблицу.")
-
-
-
-
-
-
-
-
-
+            st.warning(f"Ошибка загрузки данных: {e}")
