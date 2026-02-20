@@ -475,3 +475,4 @@ elif menu == "Аналитика":
         except Exception as e:
             st.warning(f"Ошибка загрузки: {e}")
 
+
