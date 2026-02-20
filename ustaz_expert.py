@@ -438,31 +438,54 @@ if menu == "Ввод данных":
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
-# --- ГЛАВНОЕ МЕНЮ: АНАЛИТИКА (Должен стоять строго под IF) ---
+# --- ПОДГОТОВКА ФАЙЛА WORD ---
+        docx_file = generate_official_word({
+            'teacher': t_fio, 't_cat': t_cat, 'observer': o_fio, 'o_pos': o_pos,
+            'date': str(t_date), 'subject': t_subj, 'topic': t_topic, 'goal': t_goal,
+            'scores': scores, 'total': total_score, 'recs': recs
+        }, lang)
+
+        bio = io.BytesIO()
+        docx_file.save(bio)
+        docx_bytes = bio.getvalue()
+
+        # --- КНОПКИ ДЕЙСТВИЙ ---
+        c_save, c_down = st.columns(2)
+        
+        with c_save:
+            if st.button("💾 Сохранить в базу"):
+                try:
+                    row_to_add = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
+                    ws.append_row(row_to_add)
+                    st.toast("✅ Данные сохранены!", icon="🎉")
+                except Exception as e:
+                    st.error(f"Ошибка записи: {e}")
+
+        with c_down:
+            st.download_button(
+                label="📄 Скачать Word",
+                data=docx_bytes,
+                file_name=f"List_{t_fio}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+
+# --- РАЗДЕЛ АНАЛИТИКА (ГЛАВНЫЙ УРОВЕНЬ) ---
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
     sh = connect_google()
     if sh:
         try:
             ws = sh.worksheet("Аналитика_Приложение14")
-            data = ws.get_all_records()
-            df = pd.DataFrame(data)
-            
+            df = pd.DataFrame(ws.get_all_records())
             if not df.empty:
-                # Фильтруем только школу текущего пользователя
                 school_df = df[df['Школа'] == u['школа']]
                 st.dataframe(school_df)
-                
                 if not school_df.empty:
                     st.bar_chart(school_df, x="Педагог", y="Итог")
-                else:
-                    st.info("По вашей школе данных пока нет.")
             else:
                 st.info("База данных пока пуста.")
-                
         except Exception as e:
-            st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
-
+            st.warning(f"Ошибка загрузки: {e}")
 
 
 
