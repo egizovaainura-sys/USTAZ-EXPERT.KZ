@@ -408,7 +408,7 @@ if menu == "Ввод данных":
 
   # --- 1. ГЕНЕРАЦИЯ WORD (СО ВСЕМИ ПОЛЯМИ) ---
         # Здесь мы собираем все введенные вами данные в один документ
-        docx_file = generate_official_word({
+    docx_file = generate_official_word({
             'teacher': t_fio,
             't_cat': t_cat,
             'observer': o_fio,
@@ -483,3 +483,4 @@ elif menu == "Аналитика":
                 
         except Exception as e:
             st.warning(f"Ошибка загрузки аналитики: {e}")
+
