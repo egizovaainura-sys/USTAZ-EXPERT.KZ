@@ -412,11 +412,19 @@ if menu == "Приложение 14 (Аттестация)":
         'recs': recs
     }, lang)
     
-    col_down.download_button(
-        label="📄 Скачать Word",
-        data=docx_file,
-        file_name=f"App14_{t_fio}_{t_date}.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+   # --- 1. Сначала превращаем документ Word в байты (готовим к отправке) ---
+import io
+bio = io.BytesIO()
+docx_file.save(bio) # Сохраняем документ в память
+docx_bytes = bio.getvalue() # Получаем чистые данные (байты)
+
+# --- 2. Теперь создаем саму кнопку ---
+col_down.download_button(
+    label="📄 Скачать Лист наблюдения (Word)",
+    data=docx_bytes, # ПЕРЕДАЕМ БАЙТЫ, А НЕ ОБЪЕКТ!
+    file_name=f"List_Nabludeniya_{t_fio}.docx",
+    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+)
     )
 
 # --- РАЗДЕЛ: АНАЛИТИКА ---
@@ -442,6 +450,7 @@ elif menu == "Аналитика":
         except Exception as e:
 
             st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
+
 
 
 
