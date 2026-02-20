@@ -47,7 +47,13 @@ AUTHOR_INFO = {
     "name": "АДИЛЬБАЕВА АЙНУРА ДУЙШЕМБЕКОВНА",
     "insta": "@uchitel_tdk",
     "whatsapp": "+7 777 651 30 22"
-}
+} # --- 2.1 ОТОБРАЖЕНИЕ В SIDEBAR ---
+with st.sidebar:
+    st.markdown(f"### 👩‍🏫 Автор: {AUTHOR_INFO['name']}")
+    st.info("Секретарь аттестационной комиссии") # Ваша роль в школе
+    st.markdown(f"📸 Instagram: [{AUTHOR_INFO['insta']}](https://instagram.com/{AUTHOR_INFO['insta'][1:]})")
+    st.markdown(f"📞 WhatsApp: [Связаться](https://wa.me/{AUTHOR_INFO['whatsapp'].replace(' ', '').replace('+', '')})")
+    st.divider()
 
 # --- 3. БАЗА КРИТЕРИЕВ (Приложение14) ---
 APP14_DB_FINAL = [
@@ -383,4 +389,5 @@ elif menu == "Аналитика":
         except Exception as e:
 
             st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
+
 
