@@ -397,68 +397,66 @@ if menu == "Приложение 14 (Аттестация)":
             except Exception as e:
                 st.error(f"Ошибка записи: {e}")
 
-   # --- 1. ВЫБОР РАЗДЕЛА (Маячок) ---
+  # --- ГЛАВНОЕ МЕНЮ (Прижато к левому краю) ---
 menu = st.sidebar.selectbox("Выберите раздел", ["Ввод данных", "Аналитика"])
 
 if menu == "Ввод данных":
-    st.header("📝 Лист наблюдения урока")
+    st.header("📝 Новый лист наблюдения")
     
-    # Здесь должен идти ваш блок с полями ввода (t_fio, t_topic и т.д.)
-    # Если он уже есть выше - хорошо, если нет - проверьте переменные.
+    # (Здесь ваш основной код с полями ввода t_fio, t_topic и т.д.)
 
-# --- 1. ГЕНЕРАЦИЯ WORD (СТРОГО 8 ПРОБЕЛОВ ОТ КРАЯ) ---
-        # Мы собираем все 11 полей, которые вы ввели:
-        docx_file = generate_official_word({
-            'teacher': t_fio,
-            't_cat': t_cat,
-            'observer': o_fio,
-            'o_pos': o_pos,
-            'date': str(t_date),
-            'subject': t_subj,
-            'topic': t_topic,
-            'goal': t_goal,
-            'scores': scores,
-            'total': total_score,
-            'recs': recs
-        }, lang)
+    # --- ШАГ 1: ГЕНЕРАЦИЯ WORD (СО ВСЕМИ ВАШИМИ ДАННЫМИ) ---
+    docx_file = generate_official_word({
+        'teacher': t_fio,
+        't_cat': t_cat,
+        'observer': o_fio,
+        'o_pos': o_pos,
+        'date': str(t_date),
+        'subject': t_subj,
+        'topic': t_topic,
+        'goal': t_goal,
+        'scores': scores,
+        'total': total_score,
+        'recs': recs
+    }, lang)
 
-        # Подготовка файла к скачиванию
-        import io
-        bio = io.BytesIO()
-        docx_file.save(bio)
-        docx_bytes = bio.getvalue()
+    # ПОДГОТОВКА К СКАЧИВАНИЮ (Ровно 4 пробела от края)
+    import io
+    bio = io.BytesIO()
+    docx_file.save(bio)
+    docx_bytes = bio.getvalue()
 
-        st.divider()
+    st.divider()
 
-        # --- 2. КНОПКИ ДЕЙСТВИЙ (В две колонки) ---
-        col_1, col_2 = st.columns(2)
+    # --- ШАГ 2: КНОПКИ (В ДВЕ КОЛОНКИ) ---
+    col_1, col_2 = st.columns(2)
 
-        with col_1:
-            # Кнопка сохранения. Добавлен key, чтобы убрать ошибку "дубликатов"
-            if st.button("💾 Сохранить в базу Google", key="save_vfinal_btn"):
-                try:
-                    sh = connect_google()
-                    if sh:
-                        ws = sh.worksheet("Аналитика_Приложение14")
-                        # Записываем все данные: Дата, Наблюдатель, Учитель, Предмет, Тема, Балл
-                        row_to_add = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
-                        ws.append_row(row_to_add)
-                        st.success(f"✅ Данные педагога {t_fio} сохранены!")
-                        st.balloons()
-                except Exception as e:
-                    st.error(f"Ошибка сохранения: {e}")
+    with col_1:
+        # key="final_save_btn" убирает ошибку "DuplicateElementId"
+        if st.button("💾 Сохранить в базу Google", key="final_save_btn"):
+            try:
+                sh = connect_google()
+                if sh:
+                    ws = sh.worksheet("Аналитика_Приложение14")
+                    # Сохраняем все данные в вашу таблицу
+                    row = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
+                    ws.append_row(row)
+                    st.success(f"✅ Данные учителя {t_fio} сохранены!")
+                    st.balloons()
+            except Exception as e:
+                st.error(f"Ошибка сохранения: {e}")
 
-        with col_2:
-            # Кнопка скачивания Word (не исчезнет после сохранения)
-            st.download_button(
-                label="📄 Скачать Лист (Word)",
-                data=docx_bytes,
-                file_name=f"List_Nabludeniya_{t_fio}.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                key="down_vfinal_btn"
-            )
+    with col_2:
+        # Кнопка скачивания Word (не исчезнет после сохранения)
+        st.download_button(
+            label="📄 Скачать Лист (Word)",
+            data=docx_bytes,
+            file_name=f"List_Nabludeniya_{t_fio}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            key="final_down_btn"
+        )
 
-# --- 3. РАЗДЕЛ АНАЛИТИКА (ПРИЖАТ К ЛЕВОМУ КРАЮ - 0 ПРОБЕЛОВ!) ---
+# --- РАЗДЕЛ АНАЛИТИКА (Прижат к самому левому краю - 0 пробелов!) ---
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
     sh = connect_google()
@@ -467,7 +465,7 @@ elif menu == "Аналитика":
             ws = sh.worksheet("Аналитика_Приложение14")
             df = pd.DataFrame(ws.get_all_records())
             if not df.empty:
-                # Фильтруем таблицу, чтобы видеть данные только своей школы
+                # Фильтруем данные вашей школы
                 school_df = df[df['Школа'] == u['школа']]
                 st.dataframe(school_df)
                 if not school_df.empty:
