@@ -122,16 +122,20 @@ APP14_DB_FINAL = [
 def connect_google():
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        # ВАЖНО: Файл ключа должен называться google_key.json
-        creds = ServiceAccountCredentials.from_json_keyfile_name("google_key.json", scope)
-        client = gspread.authorize(creds)
-        # Открываем таблицу
-        return client.open("Ustaz_Expert_DB")
-    except FileNotFoundError:
-        st.error("❌ Не найден файл google_key.json! Проверьте, что он лежит рядом с программой.")
-        return None
+        
+        # Мы больше НЕ ищем файл! Мы сразу идем в "сейф" (st.secrets)
+        if "gcp_service_account" in st.secrets:
+            creds_info = dict(st.secrets["gcp_service_account"])
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_info, scope)
+            client = gspread.authorize(creds)
+            # Открываем вашу таблицу по названию
+            return client.open("Ustaz_Expert_DB")
+        else:
+            st.error("❌ Ошибка: Секреты gcp_service_account не найдены в настройках Streamlit!")
+            return None
+            
     except Exception as e:
-        st.error(f"❌ Ошибка подключения к Google: {e}")
+        st.error(f"❌ Ошибка подключения: {e}")
         return None
 
 # --- 5. ГЕНЕРАЦИЯ WORD ---
@@ -370,4 +374,5 @@ elif menu == "Аналитика":
                 st.info("База данных пока пуста.")
                 
         except Exception as e:
+
             st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
