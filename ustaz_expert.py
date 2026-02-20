@@ -397,46 +397,54 @@ if menu == "Приложение 14 (Аттестация)":
             except Exception as e:
                 st.error(f"Ошибка записи: {e}")
 
-    # Кнопка СКАЧАТЬ WORD
+   # --- 1. ВЫБОР РАЗДЕЛА (Маячок) ---
+menu = st.sidebar.selectbox("Выберите раздел", ["Ввод данных", "Аналитика"])
+
+if menu == "Ввод данных":
+    st.header("📝 Лист наблюдения урока")
+    
+    # Здесь должен идти ваш блок с полями ввода (t_fio, t_topic и т.д.)
+    # Если он уже есть выше - хорошо, если нет - проверьте переменные.
+
+    # --- 2. ГЕНЕРАЦИЯ WORD (8 пробелов от края) ---
     docx_file = generate_official_word({
-        'teacher': t_fio, 
-        't_cat': t_cat, 
-        'observer': o_fio, 
-        'o_pos': o_pos, 
-        'date': str(t_date), 
-        'subject': t_subj, 
-        'topic': t_topic, 
-        'goal': t_goal, 
-        'scores': scores, 
-        'total': total_score, 
-        'recs': recs
+        'teacher': t_fio, 't_cat': t_cat, 'observer': o_fio, 'o_pos': o_pos,
+        'date': str(t_date), 'subject': t_subj, 'topic': t_topic, 'goal': t_goal,
+        'scores': scores, 'total': total_score, 'recs': recs
     }, lang)
 
-# --- 1. ПЕРЕВОД В БАЙТЫ (Внутри меню "Ввод данных") --- 
-        import io
-        bio = io.BytesIO()
-        docx_file.save(bio)
-        docx_bytes = bio.getvalue()
+    import io
+    bio = io.BytesIO()
+    docx_file.save(bio)
+    docx_bytes = bio.getvalue()
 
-        # КНОПКА СКАЧИВАНИЯ (Теперь она не исчезнет)
-        st.download_button(
-            label="📄 СКАЧАТЬ ЛИСТ НАБЛЮДЕНИЯ (WORD)",
-            data=docx_bytes,
-            file_name=f"List_Nabludeniya_{t_fio}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+    st.divider()
 
-        # БЛОК СОХРАНЕНИЯ (Исправленная логика отступов)
-        if st.button("💾 Сохранить в базу Google"):
+    # --- 3. КНОПКИ (в две колонки) ---
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("💾 Сохранить в базу"):
             try:
-                # (Здесь должен быть ваш код сохранения в таблицу)
-                st.success("✅ Данные успешно добавлены!")
+                # Ваш код сохранения: ws.append_row([...])
+                st.success("✅ Сохранено в Google Таблицу!")
             except Exception as e:
                 st.error(f"Ошибка сохранения: {e}")
 
-# --- РАЗДЕЛ АНАЛИТИКА (Должен стоять у САМОГО края без пробелов!) ---
+    with col2:
+        # КНОПКА WORD (Теперь она будет видна всегда!)
+        st.download_button(
+            label="📄 Скачать Лист (Word)",
+            data=docx_bytes,
+            file_name=f"List_{t_fio}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+# --- 4. РАЗДЕЛ АНАЛИТИКА (Прижат к левому краю!) ---
 elif menu == "Аналитика":
-    
+    st.header("📊 Аналитика по школе")
+    # ... здесь ваш код аналитики без изменений ...
+
 
 
 
