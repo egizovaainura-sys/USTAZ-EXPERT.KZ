@@ -423,7 +423,7 @@ if menu == "Ввод данных":
         }, lang)
 
         # Подготовка файла к отправке пользователю
-        import io
+    import io
         bio = io.BytesIO()
         docx_file.save(bio)
         docx_bytes = bio.getvalue()
@@ -483,4 +483,5 @@ elif menu == "Аналитика":
                 
         except Exception as e:
             st.warning(f"Ошибка загрузки аналитики: {e}")
+
 
