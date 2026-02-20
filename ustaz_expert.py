@@ -425,9 +425,7 @@ col_down.download_button(
     file_name=f"List_Nabludeniya_{t_fio}.docx",
     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 )
-    )
-
-# --- РАЗДЕЛ: АНАЛИТИКА ---
+    # --- РАЗДЕЛ: АНАЛИТИКА ---
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
     sh = connect_google()
@@ -450,6 +448,7 @@ elif menu == "Аналитика":
         except Exception as e:
 
             st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
+
 
 
 
