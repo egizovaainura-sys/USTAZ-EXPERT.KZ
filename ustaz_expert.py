@@ -420,30 +420,33 @@ if menu == "Ввод данных":
 
     st.divider()
 
-    # --- 3. КНОПКИ (в две колонки) ---
-    col1, col2 = st.columns(2)
+    # --- КНОПКИ ДЕЙСТВИЙ ---
+        col_save, col_down = st.columns(2)
 
-    with col1:
-        if st.button("💾 Сохранить в базу"):
-            try:
-                # Ваш код сохранения: ws.append_row([...])
-                st.success("✅ Сохранено в Google Таблицу!")
-            except Exception as e:
-                st.error(f"Ошибка сохранения: {e}")
+        with col_save:
+            # Добавляем key="unique_save", чтобы не было ошибки дубликата
+            if st.button("💾 Сохранить в базу", key="unique_save"):
+                try:
+                    # Ваш код сохранения...
+                    st.success("✅ Сохранено!")
+                except Exception as e:
+                    st.error(f"Ошибка: {e}")
 
-    with col2:
-        # КНОПКА WORD (Теперь она будет видна всегда!)
-        st.download_button(
-            label="📄 Скачать Лист (Word)",
-            data=docx_bytes,
-            file_name=f"List_{t_fio}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+        with col_down:
+            # Кнопка скачивания Word
+            st.download_button(
+                label="📄 Скачать Word",
+                data=docx_bytes,
+                file_name=f"List_{t_fio}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                key="unique_download" # Тоже добавим ключ на всякий случай
+            )
 
-# --- 4. РАЗДЕЛ АНАЛИТИКА (Прижат к левому краю!) ---
+    # --- 4. РАЗДЕЛ АНАЛИТИКА (Прижат к левому краю!) ---
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
     # ... здесь ваш код аналитики без изменений ...
+
 
 
 
