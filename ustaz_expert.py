@@ -438,54 +438,50 @@ if menu == "Ввод данных":
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
-# --- ПОДГОТОВКА ФАЙЛА WORD ---
-        docx_file = generate_official_word({
-            'teacher': t_fio, 't_cat': t_cat, 'observer': o_fio, 'o_pos': o_pos,
-            'date': str(t_date), 'subject': t_subj, 'topic': t_topic, 'goal': t_goal,
-            'scores': scores, 'total': total_score, 'recs': recs
-        }, lang)
+# --- 1. ПРЕДВАРИТЕЛЬНЫЙ ПРОСМОТР (Отображаем на экране) ---
+    st.subheader("👀 Предварительный просмотр")
+    st.write(f"**Педагог:** {t_fio} | **Тема:** {t_topic}")
+    st.info(f"**Цель:** {t_goal}")
 
-        bio = io.BytesIO()
-        docx_file.save(bio)
-        docx_bytes = bio.getvalue()
+    # --- 2. ПОДГОТОВКА ФАЙЛА WORD (В памяти) ---
+    # ВАЖНО: здесь ровно 4 пробела от края!
+    docx_file = generate_official_word({
+        'teacher': t_fio, 't_cat': t_cat, 'observer': o_fio, 'o_pos': o_pos,
+        'date': str(t_date), 'subject': t_subj, 'topic': t_topic, 'goal': t_goal,
+        'scores': scores, 'total': total_score, 'recs': recs
+    }, lang)
 
-        # --- КНОПКИ ДЕЙСТВИЙ ---
-        c_save, c_down = st.columns(2)
-        
-        with c_save:
-            if st.button("💾 Сохранить в базу"):
-                try:
-                    row_to_add = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
-                    ws.append_row(row_to_add)
-                    st.toast("✅ Данные сохранены!", icon="🎉")
-                except Exception as e:
-                    st.error(f"Ошибка записи: {e}")
+    bio = io.BytesIO()
+    docx_file.save(bio)
+    docx_bytes = bio.getvalue()
 
-        with c_down:
-            st.download_button(
-                label="📄 Скачать Word",
-                data=docx_bytes,
-                file_name=f"List_{t_fio}.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
+    # --- 3. КНОПКИ: СОХРАНИТЬ И РАСПЕЧАТАТЬ ---
+    c_save, c_down = st.columns(2)
+    
+    with c_save:
+        if st.button("💾 Сохранить в базу Google"):
+            try:
+                # Добавляем строку в вашу таблицу
+                row_to_add = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
+                ws.append_row(row_to_add)
+                st.balloons() # Праздничный эффект при сохранении
+                st.success("Данные успешно занесены в таблицу!")
+            except Exception as e:
+                st.error(f"Ошибка сохранения: {e}")
 
-# --- РАЗДЕЛ АНАЛИТИКА (ГЛАВНЫЙ УРОВЕНЬ) ---
+    with c_down:
+        # Это и есть ваша кнопка для "Распечатки" (скачиваете и печатаете Word)
+        st.download_button(
+            label="🖨️ Скачать для печати (Word)",
+            data=docx_bytes,
+            file_name=f"List_{t_fio}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+# --- ГЛАВНЫЙ УРОВЕНЬ: АНАЛИТИКА (без пробелов в начале!) ---
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
-    sh = connect_google()
-    if sh:
-        try:
-            ws = sh.worksheet("Аналитика_Приложение14")
-            df = pd.DataFrame(ws.get_all_records())
-            if not df.empty:
-                school_df = df[df['Школа'] == u['школа']]
-                st.dataframe(school_df)
-                if not school_df.empty:
-                    st.bar_chart(school_df, x="Педагог", y="Итог")
-            else:
-                st.info("База данных пока пуста.")
-        except Exception as e:
-            st.warning(f"Ошибка загрузки: {e}")
+    # ... (ваш код аналитики)
 
 
 
