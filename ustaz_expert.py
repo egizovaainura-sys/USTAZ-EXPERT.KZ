@@ -418,14 +418,15 @@ bio = io.BytesIO()
 docx_file.save(bio) # Сохраняем документ в память
 docx_bytes = bio.getvalue() # Получаем чистые данные (байты)
 
-# --- 2. Теперь создаем саму кнопку ---
-col_down.download_button(
-    label="📄 Скачать Лист наблюдения (Word)",
-    data=docx_bytes, # ПЕРЕДАЕМ БАЙТЫ, А НЕ ОБЪЕКТ!
-    file_name=f"List_Nabludeniya_{t_fio}.docx",
-    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-)
-# --- РАЗДЕЛ: АНАЛИТИКА ---
+# --- 2. Теперь создаем саму кнопку (сдвинута вправо, внутри меню Ввод данных) ---
+        col_down.download_button(
+            label="📄 Скачать Лист наблюдения (Word)",
+            data=docx_bytes,
+            file_name=f"List_Nabludeniya_{t_fio}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+# --- РАЗДЕЛ: АНАЛИТИКА (Должен стоять строго под самым первым if menu == ...) ---
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
     sh = connect_google()
@@ -442,13 +443,13 @@ elif menu == "Аналитика":
                 
                 if not school_df.empty:
                     st.bar_chart(school_df, x="Педагог", y="Итог")
+                else:
+                    st.info("По вашей школе данных пока нет.")
             else:
                 st.info("База данных пока пуста.")
                 
         except Exception as e:
-
             st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
-
 
 
 
