@@ -406,15 +406,22 @@ if menu == "Ввод данных":
     # Здесь должен идти ваш блок с полями ввода (t_fio, t_topic и т.д.)
     # Если он уже есть выше - хорошо, если нет - проверьте переменные.
 
-   # --- 1. ГЕНЕРАЦИЯ WORD (Внутри блока Ввод данных) ---
-        import io
+  # --- ШАГ 1: ГЕНЕРАЦИЯ WORD (Со всеми вашими данными) ---
         docx_file = generate_official_word({
-            'teacher': t_fio, 't_cat': t_cat, 'observer': o_fio, 'o_pos': o_pos,
-            'date': str(t_date), 'subject': t_subj, 'topic': t_topic, 'goal': t_goal,
-            'scores': scores, 'total': total_score, 'recs': recs
+            'teacher': t_fio, 
+            't_cat': t_cat, 
+            'observer': o_fio, 
+            'o_pos': o_pos,
+            'date': str(t_date), 
+            'subject': t_subj, 
+            'topic': t_topic, 
+            'goal': t_goal,
+            'scores': scores, 
+            'total': total_score, 
+            'recs': recs
         }, lang)
 
-# --- 1. ГОТОВИМ WORD (Ровно 8 пробелов от края) ---
+        # --- ШАГ 2: ПОДГОТОВКА К СКАЧИВАНИЮ ---
         import io
         bio = io.BytesIO()
         docx_file.save(bio)
@@ -422,33 +429,35 @@ if menu == "Ввод данных":
 
         st.divider()
 
-        # --- 2. КНОПКИ ДЕЙСТВИЙ ---
+        # --- ШАГ 3: КНОПКИ (Сохранение и Скачивание) ---
         col_s, col_d = st.columns(2)
 
         with col_s:
-            # key="save_final_btn" убирает ошибку StreamlitDuplicateElementId
-            if st.button("💾 Сохранить в базу", key="save_final_btn"):
+            # Кнопка сохранения. Key нужен, чтобы не было ошибки "дубликата"
+            if st.button("💾 Сохранить в базу Google", key="final_save_action"):
                 try:
                     sh = connect_google()
                     if sh:
                         ws = sh.worksheet("Аналитика_Приложение14")
-                        row = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
-                        ws.append_row(row)
-                        st.success("✅ Данные успешно добавлены в таблицу!")
+                        # ТУТ ВСЕ ВАШИ ДАННЫЕ: Дата, Кто смотрел, Кто давал урок, Предмет, Тема, Балл
+                        data_row = [str(t_date), o_fio, t_fio, t_subj, t_topic, total_score]
+                        ws.append_row(data_row)
+                        st.success(f"✅ Данные педагога {t_fio} сохранены!")
+                        st.balloons()
                 except Exception as e:
-                    st.error(f"Ошибка сохранения: {e}")
+                    st.error(f"Ошибка при записи в таблицу: {e}")
 
         with col_d:
-            # Кнопка скачивания Word (теперь она не исчезнет)
+            # Кнопка скачивания. Она теперь независима и не исчезнет.
             st.download_button(
                 label="📄 Скачать Лист (Word)",
                 data=docx_bytes,
                 file_name=f"List_Nabludeniya_{t_fio}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                key="download_final_btn"
+                key="final_download_action"
             )
 
-# --- 3. АНАЛИТИКА (Прижат к самому левому краю, 0 пробелов!) ---
+# --- ШАГ 4: РАЗДЕЛ АНАЛИТИКА (Строго с начала строки!) ---
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
     sh = connect_google()
@@ -457,13 +466,12 @@ elif menu == "Аналитика":
             ws = sh.worksheet("Аналитика_Приложение14")
             df = pd.DataFrame(ws.get_all_records())
             if not df.empty:
-                # Фильтруем данные для вашей школы
+                # Показываем таблицу только по вашей школе
                 school_df = df[df['Школа'] == u['школа']]
                 st.dataframe(school_df)
                 if not school_df.empty:
                     st.bar_chart(school_df, x="Педагог", y="Итог")
             else:
-                st.info("База данных пока пуста.")
+                st.info("В базе пока нет записей.")
         except Exception as e:
-            st.warning(f"Ошибка загрузки данных: {e}")
-
+            st.warning(f"Не удалось загрузить аналитику: {e}")
