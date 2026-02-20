@@ -180,7 +180,7 @@ def generate_official_word(data, lang):
     doc.add_paragraph(f"Педагог: {data['teacher']} (Должность/Категория: {data['t_cat']})")
     doc.add_paragraph(f"Дата: {data['date']} | Предмет: {data['subject']}")
     doc.add_paragraph(f"Тема: {data['topic']}")
-    doc.add_paragraph(f"Цель: {data['goal']}")
+    doc.add_paragraph(f"Цель: {data.get('goal', 'Не указана')}")
     
     # Таблица
     table = doc.add_table(rows=1, cols=3)
@@ -389,5 +389,6 @@ elif menu == "Аналитика":
         except Exception as e:
 
             st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
+
 
 
