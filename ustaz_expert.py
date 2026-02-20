@@ -420,43 +420,64 @@ if menu == "Ввод данных":
 
     st.divider()
 
-    # --- КНОПКИ ДЕЙСТВИЙ ---
-            col_save, col_down = st.columns(2)
+   # --- 1. ПРЕВРАЩАЕМ WORD В БАЙТЫ (Строго под generate_official_word) ---
+        import io
+        bio = io.BytesIO()
+        docx_file.save(bio)
+        docx_bytes = bio.getvalue()
+
+        st.divider()
+
+        # --- 2. КНОПКИ ДЕЙСТВИЙ (В две колонки) ---
+        col_save, col_down = st.columns(2)
 
         with col_save:
-            # Добавляем key="unique_save", чтобы не было ошибки дубликата
-            if st.button("💾 Сохранить в базу", key="unique_save"):
+            # key="save_vfinal" убирает ошибку StreamlitDuplicateElementId
+            if st.button("💾 Сохранить в базу", key="save_vfinal"):
                 try:
-                    # Ваш код сохранения...
-                    st.success("✅ Сохранено!")
+                    sh = connect_google()
+                    if sh:
+                        ws = sh.worksheet("Аналитика_Приложение14")
+                        # Сохраняем данные для платформы Устаз
+                        ws.append_row([str(t_date), o_fio, t_fio, t_subj, t_topic, total_score])
+                        st.success("✅ Данные успешно сохранены в таблицу!")
                 except Exception as e:
-                    st.error(f"Ошибка: {e}")
+                    st.error(f"Ошибка записи: {e}")
 
         with col_down:
-            # Кнопка скачивания Word
+            # Кнопка скачивания теперь видна всегда и имеет свой ключ
             st.download_button(
-                label="📄 Скачать Word",
+                label="📄 Скачать Лист наблюдения (Word)",
                 data=docx_bytes,
-                file_name=f"List_{t_fio}.docx",
+                file_name=f"List_Nabludeniya_{t_fio}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                key="unique_download" # Тоже добавим ключ на всякий случай
+                key="download_vfinal"
             )
 
-    # --- 4. РАЗДЕЛ АНАЛИТИКА (Прижат к левому краю!) ---
+# --- 3. РАЗДЕЛ АНАЛИТИКА (Прижат к левому краю, 0 пробелов!) ---
 elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
-    # ... здесь ваш код аналитики без изменений ...
-
-
-
-
-
-
-
-
-
-
-
+    sh = connect_google()
+    if sh:
+        try:
+            ws = sh.worksheet("Аналитика_Приложение14")
+            data = ws.get_all_records()
+            df = pd.DataFrame(data)
+            
+            if not df.empty:
+                # Фильтруем данные вашей школы
+                school_df = df[df['Школа'] == u['школа']]
+                st.dataframe(school_df)
+                
+                if not school_df.empty:
+                    st.bar_chart(school_df, x="Педагог", y="Итог")
+                else:
+                    st.info("По вашей школе данных пока нет.")
+            else:
+                st.info("База данных пока пуста.")
+                
+        except Exception as e:
+            st.warning(f"Ошибка загрузки данных: {e}. Проверьте таблицу.")
 
 
 
