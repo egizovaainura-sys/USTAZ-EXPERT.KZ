@@ -154,17 +154,70 @@ def connect_google():
 # --- 5. ГЕНЕРАЦИЯ WORD ---
 def generate_official_word(data, lang):
     doc = Document()
-    style = doc.styles['Normal']
-    style.font.name = 'Times New Roman'
-    style.font.size = Pt(11)
+    
+    # 1. Заголовок документа
+    title = doc.add_heading('ЛИСТ НАБЛЮДЕНИЯ УРОКА', 0)
+    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    # 2. ШАПКА (Данные о наблюдателе и учителе)
+    # Используем .get(..., ''), чтобы если данных нет, программа не ломалась, а ставила пробел
+    
+    p1 = doc.add_paragraph()
+    p1.add_run('Наблюдатель: ').bold = True
+    p1.add_run(f"{data.get('observer', '________________')}")
+    
+    p2 = doc.add_paragraph()
+    p2.add_run('Должность: ').bold = True
+    p2.add_run(f"{data.get('o_pos', '________________')}")
+
+    p3 = doc.add_paragraph()
+    p3.add_run('Педагог: ').bold = True
+    p3.add_run(f"{data.get('teacher', '________________')}")
+    
+    p4 = doc.add_paragraph()
+    p4.add_run('Категория: ').bold = True
+    p4.add_run(f"{data.get('t_cat', '________________')}")
+
+    p5 = doc.add_paragraph()
+    p5.add_run('Дата: ').bold = True
+    p5.add_run(f"{data.get('date', '__________')}")
+    p5.add_run(' | Предмет: ').bold = True
+    p5.add_run(f"{data.get('subject', '__________')}")
+
+    # 3. ТЕМА И ЦЕЛЬ (Выделяем жирным)
+    p6 = doc.add_paragraph()
+    run_t = p6.add_run(f"Тема: {data.get('topic', 'Не указана')}")
+    run_t.bold = True
+
+    p7 = doc.add_paragraph()
+    run_g = p7.add_run(f"Цель: {data.get('goal', 'Не указана')}")
+    run_g.bold = True
+
+    doc.add_paragraph("-" * 30) # Разделительная линия
+    
+    # Дальше должен идти ваш код таблицы (таблица с критериями)...
+    return doc
+
+    # --- ВОТ ТУТ МЫ ЧИНИМ ТЕМУ И ЦЕЛЬ ---
+    p_topic = doc.add_paragraph()
+    run_t = p_topic.add_run(f"Тема: {data.get('topic', 'Не указана')}")
+    run_t.bold = True
+
+    p_goal = doc.add_paragraph()
+    run_g = p_goal.add_run(f"Цель: {data.get('goal', 'Не указана')}")
+    run_g.bold = True
+    
+    # Далее идет ваша таблица с критериями...
+    # (Оставьте код таблицы как есть)
+    return doc
     
     # Заголовок (справа)
     p_top = doc.add_paragraph()
     p_top.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     if lang == "Русский":
-        h_text = "Приложение 14\nк Правилам аттестации педагогов"
+        h_text = "Приложение 14\к Правилам аттестации педагогов"
     else:
-        h_text = "Педагогтерді аттестаттау\nқағидаларына 14-қосымша"
+        h_text = "Педагогтерді аттестаттау\қағидаларына 14-қосымша"
     
     run_h = p_top.add_run(h_text)
     run_h.bold = True
@@ -389,6 +442,7 @@ elif menu == "Аналитика":
         except Exception as e:
 
             st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
+
 
 
 
