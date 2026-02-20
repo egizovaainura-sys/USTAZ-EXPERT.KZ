@@ -426,7 +426,7 @@ col_down.download_button(
     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 )
 # --- РАЗДЕЛ: АНАЛИТИКА ---
-    elif menu == "Аналитика":
+elif menu == "Аналитика":
     st.header("📊 Аналитика по школе")
     sh = connect_google()
     if sh:
@@ -448,6 +448,7 @@ col_down.download_button(
         except Exception as e:
 
             st.warning(f"Ошибка загрузки данных: {e}. Проверьте заголовки в таблице.")
+
 
 
 
